@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop — Helvetic3D</title>
+  <meta name="description" content="Alle Produkte von Helvetic3D: 3D-Drucker, Filamente, Design-Objekte und Ersatzteile. Schweizer Qualität.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23E30613'/><rect x='44' y='22' width='12' height='56' fill='white'/><rect x='22' y='44' width='56' height='12' fill='white'/></svg>">
+</head>
+<body>
+
+  <!-- ========================= SHOP HEAD ========================= -->
+  <section class="shop-head">
+    <div class="wrap">
+      <div class="crumbs"><a href="index.html">Home</a> / <b>Shop</b></div>
+      <h1>Der ganze Shop</h1>
+      <p>Maschinen, Material und fertige Objekte — alles aus unserem Atelier in Zürich.</p>
+    </div>
+  </section>
+
+  <!-- ========================== PRODUKTE ========================= -->
+  <section class="section-pad" style="padding-top:40px">
+    <div class="wrap">
+      <div class="toolbar">
+        <div class="filters" id="filters"></div>
+        <span class="count" id="count"></span>
+        <select class="sort" id="sort">
+          <option value="pop">Beliebtheit</option>
+          <option value="asc">Preis aufsteigend</option>
+          <option value="desc">Preis absteigend</option>
+          <option value="rating">Beste Bewertung</option>
+        </select>
+      </div>
+      <div class="prod-grid" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- ======================== CUSTOM PRINT ======================= -->
+  <section class="custom section-pad" id="custom">
+    <div class="grid-bg"></div>
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Custom Print Service</span>
+        <h2>Du entwirfst.<br>Wir drucken.</h2>
+        <p>Lade dein 3D-Modell hoch und erhalte in Minuten einen Richtpreis. Wir kümmern uns um Material, Qualität und Versand.</p>
+        <div class="steps">
+          <div class="step"><span class="n">1</span><div><h4>Modell hochladen</h4><p>STL, OBJ oder 3MF — bis 200 MB.</p></div></div>
+          <div class="step"><span class="n">2</span><div><h4>Material &amp; Farbe wählen</h4><p>Über 30 Materialien und Farben verfügbar.</p></div></div>
+          <div class="step"><span class="n">3</span><div><h4>Geliefert in 48 h</h4><p>Klimaneutraler Versand in der ganzen Schweiz.</p></div></div>
+        </div>
+      </div>
+      <div class="upload" id="uploadZone">
+        <div class="up-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        </div>
+        <h4>Datei hierher ziehen</h4>
+        <p>oder klicken zum Auswählen</p>
+        <button class="btn btn--red btn--sm">Datei wählen</button>
+        <div class="formats">Unterstützt: STL · OBJ · 3MF · STEP</div>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/partials.js"></script>
+  <script>
+    mountChrome('shop');
+    mountFooter();
+
+    let activeCat = 'all';
+    let sortMode = 'pop';
+
+    const FILTERS = [
+      { key: 'all', label: 'Alle' },
+      { key: 'drucker', label: '3D-Drucker' },
+      { key: 'filament', label: 'Filamente' },
+      { key: 'deko', label: 'Deko & Design' },
+      { key: 'ersatz', label: 'Ersatzteile' },
+    ];
+
+    function drawFilters() {
+      document.getElementById('filters').innerHTML = FILTERS.map(f =>
+        `<button class="chip ${f.key === activeCat ? 'active' : ''}" data-f="${f.key}">${f.label}</button>`).join('');
+      document.querySelectorAll('[data-f]').forEach(b =>
+        b.onclick = () => { activeCat = b.dataset.f; update(); });
+    }
+
+    function update() {
+      let list = PRODUCTS.filter(p => activeCat === 'all' || p.catKey === activeCat);
+      if (sortMode === 'asc') list.sort((a, b) => a.price - b.price);
+      else if (sortMode === 'desc') list.sort((a, b) => b.price - a.price);
+      else if (sortMode === 'rating') list.sort((a, b) => b.rating - a.rating);
+      else list.sort((a, b) => b.reviews - a.reviews);
+
+      document.getElementById('count').textContent = `${list.length} Produkte`;
+      drawFilters();
+      renderProducts(list, '#grid');
+    }
+
+    document.getElementById('sort').addEventListener('change', e => { sortMode = e.target.value; update(); });
+    document.getElementById('uploadZone')?.addEventListener('click', () => toast('Demo — Upload ist deaktiviert.'));
+
+    update();
+    wireChrome();
+
+    // Direktsprung zu #custom
+    if (location.hash === '#custom') document.getElementById('custom').scrollIntoView();
+  </script>
+</body>
+</html>
