@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produkt — Helvetic3D</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23E30613'/><rect x='44' y='22' width='12' height='56' fill='white'/><rect x='22' y='44' width='56' height='12' fill='white'/></svg>">
+</head>
+<body>
+
+  <section class="pdp">
+    <div class="wrap">
+      <div class="crumbs" style="margin-bottom:26px;font-size:13px;color:var(--gray-500)">
+        <a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <b id="crumbName"></b>
+      </div>
+      <div class="pdp-grid" id="pdp"></div>
+    </div>
+  </section>
+
+  <section class="section-pad" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div><span class="eyebrow">Passt dazu</span><h2 style="margin-top:16px;font-size:clamp(26px,3.4vw,40px)">Das könnte dir gefallen</h2></div>
+        <a href="shop.html" class="btn btn--ghost btn--sm">Zum Shop <span class="arrow">→</span></a>
+      </div>
+      <div class="prod-grid" id="related"></div>
+    </div>
+  </section>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/partials.js"></script>
+  <script>
+    mountChrome('shop');
+    mountFooter();
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id') || 'p1';
+    const p = PRODUCTS.find(x => x.id === id) || PRODUCTS[0];
+
+    document.title = p.name + ' — Helvetic3D';
+    document.getElementById('crumbName').textContent = p.name;
+
+    const priceHtml = p.old
+      ? `<span class="old" style="color:var(--gray-300);text-decoration:line-through;font-size:20px;margin-right:10px">${CHF(p.old)}</span>${CHF(p.price)}`
+      : CHF(p.price);
+
+    const colors = ['#0A0A0A', '#E30613', '#f3f3f2', '#0a7d33', '#1d4ed8'];
+
+    document.getElementById('pdp').innerHTML = `
+      <div class="pdp-media">${ART[p.art]}</div>
+      <div class="pdp-info">
+        <span class="card-cat">${p.cat}</span>
+        <h1>${p.name}</h1>
+        <div class="rating"><span class="stars">${stars(p.rating)}</span> ${p.rating.toFixed(1)} · ${p.reviews} Bewertungen</div>
+        <div class="pdp-price">${priceHtml}</div>
+        <p class="pdp-desc">${p.desc} Gefertigt in unserem Atelier in Zürich mit einer Schichtpräzision von 0.05 mm — für saubere Kanten und feine Details. Jedes Objekt wird von Hand geprüft, bevor es klimaneutral versendet wird.</p>
+
+        <div class="pdp-opts">
+          <label>Farbe</label>
+          <div class="swatches" id="swatches">
+            ${colors.map((c, i) => `<span class="swatch ${i === 0 ? 'on' : ''}" style="background:${c}" data-c></span>`).join('')}
+          </div>
+        </div>
+
+        <div class="pdp-actions">
+          <button class="btn btn--red" style="flex:1" data-add="${p.id}">In den Warenkorb · ${CHF(p.price)}</button>
+          <button class="btn btn--ghost" aria-label="Merken">♡</button>
+        </div>
+
+        <div class="pdp-meta">
+          <div><b>Material</b><span>${p.catKey === 'filament' ? 'PLA · 1.75 mm' : 'PLA / PETG (wählbar)'}</span></div>
+          <div><b>Lieferzeit</b><span>2–4 Werktage · gratis ab CHF 60.–</span></div>
+          <div><b>Herkunft</b><span>Gedruckt in Zürich 🇨🇭</span></div>
+          <div><b>Garantie</b><span>30 Tage Rückgaberecht</span></div>
+        </div>
+      </div>`;
+
+    // Farb-Swatches
+    document.querySelectorAll('#swatches .swatch').forEach(s =>
+      s.onclick = () => {
+        document.querySelectorAll('#swatches .swatch').forEach(x => x.classList.remove('on'));
+        s.classList.add('on');
+      });
+
+    // Ähnliche Produkte
+    renderProducts(PRODUCTS.filter(x => x.id !== p.id).slice(0, 4), '#related');
+
+    wireChrome();
+  </script>
+</body>
+</html>
